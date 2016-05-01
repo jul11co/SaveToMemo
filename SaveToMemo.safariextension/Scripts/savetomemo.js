@@ -13,12 +13,9 @@ function performCommand(event) {
             type: 'link', 
             url: currentTabUrl 
         });
-    } else if (event.command === 'memo-save-page-newtab') {
-        var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
-        openNewTab("http://memo.jul11.co/tools/import_link?url=" + encodeURIComponent(currentTabUrl));
     } else if (event.command === 'memo-save-images-newtab') {
         var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
-        openNewTab("http://memo.jul11.co/tools/import_image?url=" + encodeURIComponent(currentTabUrl));
+        openNewTab("http://memo.jul11.co/tools/import_images?url=" + encodeURIComponent(currentTabUrl));
     } else if (event.command === 'memo-save-link-a') {
         var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
         // var currentLinkUrl = event.userInfo.replace('savetomemo:link:', ''); // url
@@ -156,12 +153,18 @@ function ajax(method, url, data, cb, headers){
     }
 }
 
-var getToken = function() {
+var getToken = function(callback) {
+    var callback = callback || function(err) {};
+
+    settings.username = safari.extension.secureSettings.getItem('username');
+    settings.password = safari.extension.secureSettings.getItem('password');
+    
     if (!settings.username || settings.username == ''
         || !settings.password || settings.username == '') {
         token = '';
-        return;
+        return callback();
     }
+    console.log('Getting token...');
     // console.log(settings);
     var basicAuth = Base64.encode(settings.username + ':' + settings.password);
     var authUrl = 'http://memo.jul11.co/api/v1/auth/token';
@@ -179,13 +182,102 @@ var getToken = function() {
                     localStorage.setItem('savetomemo-token', token);
                     // console.log(token);
                 }
+                if (res.error) {
+                    showNotification({
+                        title: 'Error when login',
+                        message: res.error.message
+                    });
+                }
             }
+            callback(err);
         },
         { "Authorization": "Basic " + basicAuth }
     );
 }
 
+var onImportResult = function(res) {
+    if (!res.error && res.items && res.items.length > 0) {
+        var title = '';
+        var message = '';
+        if (res.items.length == 1) {
+            if (res.items[0].type == 'image') {
+                title = "Image saved to Memo";
+                message = res.items[0].caption;
+                showNotification({
+                    title: title,
+                    message: message
+                }, 'http://memo.jul11.co/images');
+            } else if (res.items[0].type == 'link') {
+                title = "Link saved to Memo";
+                message = res.items[0].title;
+                showNotification({
+                    title: title,
+                    message: message
+                }, 'http://memo.jul11.co/links');
+            } else if (res.items[0].type == 'note') {
+                title = "Note saved to Memo";
+                var note = res.items[0].text;
+                if (note && note.length > 60) {
+                    note = note.substring(0, 60) + '...';
+                }
+                message = note;
+                showNotification({
+                    title: title,
+                    message: message
+                }, 'http://memo.jul11.co/notes');
+            }
+        } else {
+            title = "" + res.items.length + " items saved to Memo";
+            var links_count = 0;
+            var images_count = 0;
+            var notes_count = 0;
+            res.items.forEach(function(imported_item) {
+                if (imported_item.type == 'link') links_count++;
+                else if (imported_item.type == 'image') images_count++;
+                else if (imported_item.type == 'note') notes_count++;
+            });
+            if (links_count > 0) {
+                message += '' + links_count + ' link(s)';
+            }
+            if (images_count > 0) {
+                message += ' ' + images_count + ' image(s)';
+            }
+            if (notes_count > 0) {
+                message += ' ' + notes_count + ' note(s)';
+            }
+            showNotification({
+                title: title,
+                message: message
+            }, 'http://memo.jul11.co/');
+        }
+    } else if (res.error) {
+        // console.log(res);
+        showNotification({
+            title: "Error",
+            message: res.error.message
+        });
+    }
+}
+
 var importToMemo = function(item){
+    var callback = callback || function(err) {};
+    if (!settings.username || settings.username == ''
+        || !settings.password || settings.username == '') {
+        showNotification({
+            title: 'Enter Memo credentials',
+            message: 'Safari > Preferences.. > Extensions > SaveToMemo'
+        });
+        return;
+    }
+    if (!token || token == '') {
+        console.log('Getting token...');
+        getToken(function(err) {
+            if (!err && token && token != '') {
+                importToMemo(item);
+            }
+        });
+        return;
+    }
     // console.log('importToMemo:', item);
     var importUrl = 'http://memo.jul11.co/api/v1/tools/import';
     ajax(
@@ -199,67 +291,7 @@ var importToMemo = function(item){
                 console.log('unknown err', err);
             } else {
                 console.log(res);
-                if (!res.error && res.items && res.items.length > 0) {
-                    var title = '';
-                    var message = '';
-                    if (res.items.length == 1) {
-                        if (res.items[0].type == 'image') {
-                            title = "Image saved to Memo";
-                            message = res.items[0].caption;
-                            showNotification({
-                                title: title,
-                                message: message
-                            }, 'http://memo.jul11.co/images');
-                        } else if (res.items[0].type == 'link') {
-                            title = "Link saved to Memo";
-                            message = res.items[0].title;
-                            showNotification({
-                                title: title,
-                                message: message
-                            }, 'http://memo.jul11.co/links');
-                        } else if (res.items[0].type == 'note') {
-                            title = "Note saved to Memo";
-                            var note = res.items[0].text;
-                            if (note && note.length > 60) {
-                                note = note.substring(0, 60) + '...';
-                            }
-                            message = note;
-                            showNotification({
-                                title: title,
-                                message: message
-                            }, 'http://memo.jul11.co/notes');
-                        }
-                    } else {
-                        title = "" + res.items.length + " items saved to Memo";
-                        var links_count = 0;
-                        var images_count = 0;
-                        var notes_count = 0;
-                        res.items.forEach(function(imported_item) {
-                            if (imported_item.type == 'link') links_count++;
-                            else if (imported_item.type == 'image') images_count++;
-                            else if (imported_item.type == 'note') notes_count++;
-                        });
-                        if (links_count > 0) {
-                            message += '' + links_count + ' link(s)';
-                        }
-                        if (images_count > 0) {
-                            message += ' ' + images_count + ' image(s)';
-                        }
-                        if (notes_count > 0) {
-                            message += ' ' + notes_count + ' note(s)';
-                        }
-                        showNotification({
-                            title: title,
-                            message: message
-                        }, 'http://memo.jul11.co/');
-                    }
-                } else if (res.error) {
-                    // console.log(res);
-                    showNotification({
-                        title: "Error",
-                        message: res.error.message
-                    });
-                }
+                onImportResult(res);
             }
         },
         { "Authorization": "Bearer " + token }

@@ -5,7 +5,7 @@
 	<key>Author</key>
 	<string>Manh Thiep &lt;manhthiep@gmail.com&gt;</string>
 	<key>Builder Version</key>
-	<string>11601.4.4</string>
+	<string>11601.5.17.1</string>
 	<key>CFBundleDisplayName</key>
 	<string>SaveToMemo</string>
 	<key>CFBundleIdentifier</key>
@@ -24,9 +24,17 @@
 				<key>Command</key>
 				<string>memo-save-page</string>
 				<key>Identifier</key>
-				<string>SaveToMemo</string>
+				<string>SavePageToMemo</string>
 				<key>Title</key>
 				<string>Save This Page To Memo</string>
+			</dict>
+			<dict>
+				<key>Command</key>
+				<string>memo-save-images-newtab</string>
+				<key>Identifier</key>
+				<string>SaveImagesToMemo</string>
+				<key>Title</key>
+				<string>Save Images To Memo (New tab)</string>
 			</dict>
 		</array>
 		<key>Database Quota</key>
