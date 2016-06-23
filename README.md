@@ -5,24 +5,32 @@ Browser extensions to work with http://memo.jul11.co
 
 We do not have certificate right now, so let's install it within Developer mode.
 
-1. Enable Developer menu
+1. Clone or ![download](https://github.com/jul11co/SaveToMemo/archive/master.zip) this repo
+
+	`
+	git clone https://github.com/jul11co/SaveToMemo.git
+	`
+
+2. Enable Developer menu in Safari
 
 	`
 	Safari > Preferences... > Advanced > Show Developer menu in menu bar
 	`
 
-2. Add Safari extension to Extension Builder and install it (you'll see the warning about missing certificate)
+3. Add Safari extension to Extension Builder (browse to downloaded or cloned folder)
  
 	`
-	Developer menu > Show Extension Builder > Add Extension... > Install
+	Developer menu > Show Extension Builder > Add Extension...
 	`
 
-3. Go to Preferences and add your credentials (Username & Password) of Memo (go to http://memo.jul11.co to register an account)
+4. Install extension (you'll see the warning about missing certificate)
+
+5. Go to Preferences and add your credentials (Username & Password) of ![Memo](http://memo.jul11.co)
 
 	`
 	Safari > Preferences... > Extensions > SaveToMemo > ...
 	`
 	
-4. SaveToMemo extension available in context menu on webpage, links, images, and text selection (note)
+6. SaveToMemo extension available in context menu on webpages, links, images, and selected text (as note)
 
-5. SaveToMemo also notify you in Notification Center when links/images/notes added to Memo
+7. SaveToMemo also notify you in Notification Center when links/images/notes added to Memo
