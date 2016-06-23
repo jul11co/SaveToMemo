@@ -13,10 +13,19 @@ function performCommand(event) {
             type: 'link', 
             url: currentTabUrl 
         });
-    } else if (event.command === 'memo-save-images-newtab') {
+    } else if (event.command === "memo-save-images") {
         var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
-        openNewTab("http://memo.jul11.co/tools/import_images?url=" + encodeURIComponent(currentTabUrl));
-    } else if (event.command === 'memo-save-link-a') {
+        importToMemo({ 
+            type: 'images', 
+            url: currentTabUrl 
+        });
+    } else if (event.command === "memo-save-gallery") {
+        var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
+        importToMemo({ 
+            type: 'gallery', 
+            url: currentTabUrl 
+        });
+    } else if (event.command === 'memo-save-link') {
         var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
         // var currentLinkUrl = event.userInfo.replace('savetomemo:link:', ''); // url
         try {
@@ -30,7 +39,7 @@ function performCommand(event) {
         } catch(e) {
             console.log(e);
         }
-    } else if (event.command === 'memo-save-image-img') {
+    } else if (event.command === 'memo-save-image') {
         // var currentImageSrc = event.userInfo.replace('savetomemo:image:', ''); // url
         var currentTabUrl = safari.application.activeBrowserWindow.activeTab.url;
         var currentTabTitle = safari.application.activeBrowserWindow.activeTab.title;
@@ -71,11 +80,11 @@ function handleContextMenu(event) {
     if (event.userInfo && event.userInfo.indexOf('savetomemo:') == 0) {
         var uri = event.userInfo.replace('savetomemo:', '');
         if (uri.indexOf('link:') == 0) {
-            event.contextMenu.appendContextMenuItem("memo-save-link-a", "Save This Link To Memo");
+            event.contextMenu.appendContextMenuItem("memo-save-link", "[Memo] Save This Link");
         } else if (uri.indexOf('image:') == 0) {
-            event.contextMenu.appendContextMenuItem("memo-save-image-img", "Save This Image To Memo");
+            event.contextMenu.appendContextMenuItem("memo-save-image", "[Memo] Save This Image");
         } else if (uri.indexOf('note:') == 0) {
-            event.contextMenu.appendContextMenuItem("memo-save-note", "Save This Note To Memo");
+            event.contextMenu.appendContextMenuItem("memo-save-note", "[Memo] Save This Note");
         }
     }
 }
@@ -162,6 +171,10 @@ var getToken = function(callback) {
     if (!settings.username || settings.username == ''
         || !settings.password || settings.username == '') {
         token = '';
+        showNotification({
+            title: 'Enter Memo credentials',
+            message: 'Safari > Preferences.. > Extensions > SaveToMemo'
+        });
         return callback();
     }
     console.log('Getting token...');
@@ -225,6 +238,13 @@ var onImportResult = function(res) {
                     title: title,
                     message: message
                 }, 'http://memo.jul11.co/notes');
+            } else if (res.items[0].type == 'gallery') {
+                title = "Gallery saved to Memo";
+                message = res.items[0].title;
+                showNotification({
+                    title: title,
+                    message: message
+                }, 'http://memo.jul11.co/galleries');
             }
         } else {
             title = "" + res.items.length + " items saved to Memo";
@@ -261,14 +281,6 @@ var onImportResult = function(res) {
 
 var importToMemo = function(item){
     var callback = callback || function(err) {};
-    if (!settings.username || settings.username == ''
-        || !settings.password || settings.username == '') {
-        showNotification({
-            title: 'Enter Memo credentials',
-            message: 'Safari > Preferences.. > Extensions > SaveToMemo'
-        });
-        return;
-    }
     if (!token || token == '') {
         console.log('Getting token...');
         getToken(function(err) {
@@ -289,6 +301,10 @@ var importToMemo = function(item){
         function(err, res, req){
             if (err){
                 console.log('unknown err', err);
+                showNotification({
+                    title: "Error",
+                    message: err.message
+                });
             } else {
                 console.log(res);
                 onImportResult(res);

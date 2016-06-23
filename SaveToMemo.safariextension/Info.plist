@@ -24,17 +24,17 @@
 				<key>Command</key>
 				<string>memo-save-page</string>
 				<key>Identifier</key>
-				<string>SavePageToMemo</string>
+				<string>MemoSavePage</string>
 				<key>Title</key>
-				<string>Save This Page To Memo</string>
+				<string>[Memo] Save This Page</string>
 			</dict>
 			<dict>
 				<key>Command</key>
-				<string>memo-save-images-newtab</string>
+				<string>memo-save-images</string>
 				<key>Identifier</key>
-				<string>SaveImagesToMemo</string>
+				<string>MemoSaveImages</string>
 				<key>Title</key>
-				<string>Save Images To Memo (New tab)</string>
+				<string>[Memo] Save Images</string>
 			</dict>
 		</array>
 		<key>Database Quota</key>
