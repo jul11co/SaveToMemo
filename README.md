@@ -5,7 +5,7 @@ Browser extensions to work with http://memo.jul11.co
 
 We do not have certificate right now, so let's install it within Developer mode.
 
-1. Clone or ![download](https://github.com/jul11co/SaveToMemo/archive/master.zip) this repo
+1. Clone or [download](https://github.com/jul11co/SaveToMemo/archive/master.zip) this repo
 
 	`
 	git clone https://github.com/jul11co/SaveToMemo.git
@@ -25,7 +25,7 @@ We do not have certificate right now, so let's install it within Developer mode.
 
 4. Install extension (you'll see the warning about missing certificate)
 
-5. Go to Preferences and add your credentials (Username & Password) of ![Memo](http://memo.jul11.co)
+5. Go to Preferences and add your credentials (Username & Password) of [Memo](http://memo.jul11.co)
 
 	`
 	Safari > Preferences... > Extensions > SaveToMemo > ...
